@@ -25,6 +25,7 @@ from airflow.operators.python import PythonOperator
 from airflow.providers.http.operators.http import SimpleHttpOperator
 from airflow.providers.slack.operators.slack_webhook import SlackWebhookOperator
 from airflow.utils.dates import days_ago
+from operators.discord_bot_operator import DiscordBotOperator
 
 
 def build_slack_block_message(date: str, **context) -> str:
@@ -46,6 +47,24 @@ def build_slack_block_message(date: str, **context) -> str:
         p["type"] = "section"
         p["text"] = {"type": "mrkdwn", "text": f'[{post["title"]}]({post["link"]})'}
         message.append(p)
+    return json.dumps(message)
+
+
+def build_discord_message(date: str, **context) -> str:
+    postJson = context["ti"].xcom_pull(task_ids="parse_response")
+
+    message = {}
+    message["content"] = f"**{date} : {len(postJson)}개의 공지사항이 있습니다.**"
+    message["embeds"] = []
+
+    for post in postJson:
+        elem = {}
+        elem["type"] = "link"
+        elem["title"] = post["title"]
+        elem["url"] = post["link"]
+
+        message["embeds"].append(elem)
+
     return json.dumps(message)
 
 
@@ -119,5 +138,22 @@ slackSendNotificationOperator = SlackWebhookOperator(
     dag=dag,
 )
 
+discordBuildMessageOperator = PythonOperator(
+    task_id="discord_build_message",
+    python_callable=build_discord_message,
+    op_kwargs={"date": "{{ ds }}"},
+    provide_context=True,
+    do_xcom_push=True,
+    dag=dag,
+)
+
+discordSendNotificationOperator = DiscordBotOperator(
+    task_id="discord_send_message",
+    http_conn_id="discord_noti_bot",
+    json="{{ ti.xcom_pull(task_ids='discord_build_message') }}",
+    dag=dag,
+)
+
 SKKUScraper >> parsingOperator
 parsingOperator >> slackBuildMessageOperator >> slackSendNotificationOperator
+parsingOperator >> discordBuildMessageOperator >> discordSendNotificationOperator
