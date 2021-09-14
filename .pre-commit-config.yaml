@@ -40,6 +40,8 @@ repos:
       - id: isort
         name: Run isort to sort imports in python file.
         files: \.py$
+        args:
+          - --line-length=88
   # Flake8 format checker.
   - repo: https://github.com/pyCQA/flake8
     rev: 3.9.2
