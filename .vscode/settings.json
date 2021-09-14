@@ -1,5 +1,5 @@
 {
     "python.analysis.extraPaths": [
-        "./plugins"
+        "./discord_bot_plugin/plugins"
     ]
 }
