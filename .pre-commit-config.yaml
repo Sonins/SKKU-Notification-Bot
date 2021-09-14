@@ -25,13 +25,6 @@ repos:
         args:
           - --convention=pep257
           - --add-ignore=D100,D102,D103,D104,D105,D107,D205,D400,D401
-  # Sort library import order.
-  - repo: https://github.com/PyCQA/isort
-    rev: 5.9.3
-    hooks:
-      - id: isort
-        name: Run isort to sort imports in python file.
-        files: \.py$
   # Auto formatting pre-commit hook.
   - repo: https://github.com/ambv/black
     rev: 21.8b0
@@ -39,6 +32,13 @@ repos:
       - id: black
         name: Run black python formatter.
         language_version: python3.8
+        files: \.py$
+  # Sort library import order.
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.9.3
+    hooks:
+      - id: isort
+        name: Run isort to sort imports in python file.
         files: \.py$
   # Flake8 format checker.
   - repo: https://github.com/pyCQA/flake8
