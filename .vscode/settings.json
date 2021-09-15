@@ -1,5 +1,5 @@
 {
     "python.analysis.extraPaths": [
-        "./discord_bot_plugin/plugins"
+        "./airflow/discord_bot_plugin/plugins"
     ]
 }

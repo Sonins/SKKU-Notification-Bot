@@ -18,7 +18,6 @@
 import json
 from typing import Dict
 
-from airflow import DAG
 from airflow.exceptions import AirflowNotFoundException
 from airflow.models.connection import Connection
 from airflow.operators.python import PythonOperator
@@ -26,6 +25,8 @@ from airflow.providers.http.operators.http import SimpleHttpOperator
 from airflow.providers.slack.operators.slack_webhook import SlackWebhookOperator
 from airflow.utils.dates import days_ago
 from operators.discord_bot_operator import DiscordBotOperator
+
+from airflow import DAG
 
 
 def build_slack_block_message(date: str, **context) -> str:

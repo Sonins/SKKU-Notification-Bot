@@ -1,0 +1,51 @@
+default_stages: [commit, push]
+default_language_version:
+  python: python3
+minimum_pre_commit_version: "1.20.0"
+repos:
+  # Insert license pre-commit hook.
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.1.10
+    hooks:
+      - id: insert-license
+        name: Add license for all python files.
+        files: \.py$
+        args:
+          - --comment-style
+          - "|#|"
+          - --license-filepath
+          - license-template/LICENSE.txt
+          - --fuzzy-match-generates-todo
+  # Run pydocstyle hook.
+  - repo: https://github.com/pycqa/pydocstyle
+    rev: 6.1.1
+    hooks:
+      - id: pydocstyle
+        name: Run pydocstyle
+        args:
+          - --convention=pep257
+          - --add-ignore=D100,D102,D103,D104,D105,D107,D205,D400,D401
+  # Sort library import order.
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.9.3
+    hooks:
+      - id: isort
+        name: Run isort to sort imports in python file.
+        files: \.py$
+  # Auto formatting pre-commit hook.
+  - repo: https://github.com/ambv/black
+    rev: 21.8b0
+    hooks:
+      - id: black
+        name: Run black python formatter.
+        language_version: python3.8
+        files: \.py$
+  # Flake8 format checker.
+  - repo: https://github.com/pyCQA/flake8
+    rev: 3.9.2
+    hooks:
+      - id: flake8
+        name: Run flake8 format checker.
+        files: \.py$
+        args:
+          - --ignore=E501
