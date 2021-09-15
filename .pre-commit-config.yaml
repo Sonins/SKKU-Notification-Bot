@@ -8,8 +8,8 @@ repos:
     rev: v1.1.10
     hooks:
       - id: insert-license
-        name: Add license for all python files.
-        files: \.py$
+        name: Add license for all airflow python file.
+        files: ^airflow.*\.py$
         args:
           - --comment-style
           - "|#|"
