@@ -174,6 +174,7 @@ discordSendNotificationOperator = DiscordBotOperator(
     task_id="discord_send_message",
     http_conn_id="discord_noti_bot",
     json="{{ ti.xcom_pull(task_ids='discord_build_message') }}",
+    channel="887674028368752650",
     dag=dag,
 )
 
