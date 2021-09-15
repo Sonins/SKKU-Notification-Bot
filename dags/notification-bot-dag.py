@@ -29,6 +29,14 @@ from operators.discord_bot_operator import DiscordBotOperator
 
 
 def build_slack_block_message(date: str, **context) -> str:
+    """
+    슬랙의 메시지 양식에 맞추어 Json 형태의 메시지를 만들어 주는 함수입니다.
+    Block 오브젝트를 사용합니다. 각 포스트 하나당 Block 오브젝트 하나를 사용합니다.
+    (https://api.slack.com/reference/block-kit/blocks)
+
+    :type date: str
+    :param date: The date when post you want is written.
+    """
     postJson = context["ti"].xcom_pull(task_ids="parse_response")
     message = []
     date = date.split("-")
@@ -51,6 +59,14 @@ def build_slack_block_message(date: str, **context) -> str:
 
 
 def build_discord_message(date: str, **context) -> str:
+    """
+    디스코드의 메시지 양식에 맞추어 Json 형태의 메시지를 만들어 주는 함수입니다.
+    Embed 오브젝트를 사용합니다. 각 포스트 하나당 Embed 오브젝트 하나를 사용합니다.
+    (https://discord.com/developers/docs/resources/channel#create-message)
+
+    :type date: str
+    :param date: The date when post you want is written.
+    """
     postJson = context["ti"].xcom_pull(task_ids="parse_response")
 
     message = {}
@@ -69,6 +85,13 @@ def build_discord_message(date: str, **context) -> str:
 
 
 def parse_notice(date: str, **context) -> Dict:
+    """
+    크롤링 된 공지사항 포스트 중 date 날짜에 작성된 공지사항만 필터링합니다.
+    이때, 해당 공지사항 포스트의 주소를 link 속성에 추가해줍니다.
+
+    :type date: str
+    :param date: The date when post you want is written.
+    """
     try:
         conn = Connection.get_connection_from_secrets("skku_cs_http")
         hostname = conn.host
