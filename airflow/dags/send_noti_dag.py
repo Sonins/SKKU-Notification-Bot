@@ -24,35 +24,9 @@ from airflow.models.connection import Connection
 from airflow.operators.python import PythonOperator
 from airflow.providers.http.operators.http import SimpleHttpOperator
 from airflow.utils.dates import days_ago
-from operators.discord_bot_operator import DiscordBotOperator
+from task_group.discord_notify import discord_post_notify
 
 from airflow import DAG
-
-
-def build_discord_message(date: str, **context) -> str:
-    """
-    디스코드의 메시지 양식에 맞추어 Json 형태의 메시지를 만들어 주는 함수입니다.
-    Embed 오브젝트를 사용합니다. 각 포스트 하나당 Embed 오브젝트 하나를 사용합니다.
-    (https://discord.com/developers/docs/resources/channel#create-message)
-
-    :type date: str
-    :param date: The date when post you want is written.
-    """
-    postJson = context["ti"].xcom_pull(task_ids="parse_response")
-
-    message = {}
-    message["content"] = f"**{date} : {len(postJson)}개의 공지사항이 있습니다.**"
-    message["embeds"] = []
-
-    for post in postJson:
-        elem = {}
-        elem["type"] = "link"
-        elem["title"] = post["title"]
-        elem["url"] = post["link"]
-
-        message["embeds"].append(elem)
-
-    return json.dumps(message)
 
 
 def parse_notice(date: str, **context) -> List[Dict]:
@@ -115,22 +89,13 @@ parsingOperator = PythonOperator(
     dag=dag,
 )
 
-discordBuildMessageOperator = PythonOperator(
-    task_id="discord_build_message",
-    python_callable=build_discord_message,
-    op_kwargs={"date": "{{ ds }}"},
-    provide_context=True,
-    do_xcom_push=True,
-    dag=dag,
-)
-
-discordSendNotificationOperator = DiscordBotOperator(
-    task_id="discord_send_message",
+discordNotifyTaskGroup = discord_post_notify(
     http_conn_id="discord_noti_bot",
-    json="{{ ti.xcom_pull(task_ids='discord_build_message') }}",
-    channel="887674028368752650",
+    date="{{ ds }}",
+    post="{{ ti.xcom_pull(task_ids='parse_response') }}",
+    channel="885386005274828801",
     dag=dag,
 )
 
 SKKUScraper >> parsingOperator
-parsingOperator >> discordBuildMessageOperator >> discordSendNotificationOperator
+parsingOperator >> discordNotifyTaskGroup
