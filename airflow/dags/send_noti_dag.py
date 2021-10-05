@@ -16,7 +16,8 @@
 # under the License.
 
 import json
-from typing import Dict
+import logging
+from typing import Dict, List
 
 from airflow.exceptions import AirflowNotFoundException
 from airflow.models.connection import Connection
@@ -85,7 +86,7 @@ def build_discord_message(date: str, **context) -> str:
     return json.dumps(message)
 
 
-def parse_notice(date: str, **context) -> Dict:
+def parse_notice(date: str, **context) -> List[Dict]:
     """
     크롤링 된 공지사항 포스트 중 date 날짜에 작성된 공지사항만 필터링합니다.
     이때, 해당 공지사항 포스트의 주소를 link 속성에 추가해줍니다.
@@ -97,7 +98,7 @@ def parse_notice(date: str, **context) -> Dict:
         conn = Connection.get_connection_from_secrets("skku_cs_http")
         hostname = conn.host
     except AirflowNotFoundException as err:
-        raise err
+        logging.error(f"{str(err)}")
 
     response = context["ti"].xcom_pull(task_ids="skku_cs_scrap")
     responseDict = json.loads(response)
