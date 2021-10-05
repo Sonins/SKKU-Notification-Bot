@@ -21,7 +21,8 @@ from typing import Dict, List
 
 from airflow.exceptions import AirflowNotFoundException
 from airflow.models.connection import Connection
-from airflow.operators.python import PythonOperator
+from airflow.operators.dummy import DummyOperator
+from airflow.operators.python import BranchPythonOperator, PythonOperator
 from airflow.providers.http.operators.http import SimpleHttpOperator
 from airflow.utils.dates import days_ago
 from task_group.discord_notify import discord_post_notify
@@ -58,6 +59,14 @@ def parse_notice(date: str, **context) -> List[Dict]:
     return noticeList
 
 
+def post_exists(**context) -> str:
+    posts = context["ti"].xcom_pull(task_ids="parse_response")
+    if len(posts) != 0:
+        return "exists"
+    else:
+        return "does_not_exists"
+
+
 args = {
     "owner": "Sonins",
 }
@@ -89,6 +98,16 @@ parsingOperator = PythonOperator(
     dag=dag,
 )
 
+checkPostExsitsOperator = BranchPythonOperator(
+    task_id="check_post_exists",
+    python_callable=post_exists,
+    provide_context=True,
+)
+
+postExistsOperator = DummyOperator(task_id="exists")
+
+postNotExistsOperator = DummyOperator(task_id="does_not_exists")
+
 discordNotifyTaskGroup = discord_post_notify(
     http_conn_id="discord_noti_bot",
     date="{{ ds }}",
@@ -97,5 +116,7 @@ discordNotifyTaskGroup = discord_post_notify(
     dag=dag,
 )
 
-SKKUScraper >> parsingOperator
-parsingOperator >> discordNotifyTaskGroup
+SKKUScraper >> parsingOperator >> checkPostExsitsOperator
+checkPostExsitsOperator >> postNotExistsOperator
+checkPostExsitsOperator >> postExistsOperator
+postExistsOperator >> discordNotifyTaskGroup
