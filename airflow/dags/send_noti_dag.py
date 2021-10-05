@@ -23,41 +23,10 @@ from airflow.exceptions import AirflowNotFoundException
 from airflow.models.connection import Connection
 from airflow.operators.python import PythonOperator
 from airflow.providers.http.operators.http import SimpleHttpOperator
-from airflow.providers.slack.operators.slack_webhook import SlackWebhookOperator
 from airflow.utils.dates import days_ago
 from operators.discord_bot_operator import DiscordBotOperator
 
 from airflow import DAG
-
-
-def build_slack_block_message(date: str, **context) -> str:
-    """
-    슬랙의 메시지 양식에 맞추어 Json 형태의 메시지를 만들어 주는 함수입니다.
-    Block 오브젝트를 사용합니다. 각 포스트 하나당 Block 오브젝트 하나를 사용합니다.
-    (https://api.slack.com/reference/block-kit/blocks)
-
-    :type date: str
-    :param date: The date when post you want is written.
-    """
-    postJson = context["ti"].xcom_pull(task_ids="parse_response")
-    message = []
-    date = date.split("-")
-    message.append(
-        {
-            "type": "header",
-            "text": {
-                "type": "plain_text",
-                "text": f"{date[0]}년 {date[1]}월 {date[2]}일 {len(postJson)}개의 새 공지사항",
-            },
-        }
-    )
-
-    for post in postJson:
-        p = {}
-        p["type"] = "section"
-        p["text"] = {"type": "mrkdwn", "text": f'[{post["title"]}]({post["link"]})'}
-        message.append(p)
-    return json.dumps(message)
 
 
 def build_discord_message(date: str, **context) -> str:
@@ -146,23 +115,6 @@ parsingOperator = PythonOperator(
     dag=dag,
 )
 
-slackBuildMessageOperator = PythonOperator(
-    task_id="slack_build_message",
-    python_callable=build_slack_block_message,
-    op_kwargs={"date": "{{ ds }}"},
-    provide_context=True,
-    do_xcom_push=True,
-    dag=dag,
-)
-
-slackSendNotificationOperator = SlackWebhookOperator(
-    task_id="slack_send_message",
-    http_conn_id="slack_noti_bot",
-    channel="#airflow_feature_test",
-    blocks="{{ ti.xcom_pull(task_ids='slack_build_message') }}",
-    dag=dag,
-)
-
 discordBuildMessageOperator = PythonOperator(
     task_id="discord_build_message",
     python_callable=build_discord_message,
@@ -181,5 +133,4 @@ discordSendNotificationOperator = DiscordBotOperator(
 )
 
 SKKUScraper >> parsingOperator
-parsingOperator >> slackBuildMessageOperator >> slackSendNotificationOperator
 parsingOperator >> discordBuildMessageOperator >> discordSendNotificationOperator
