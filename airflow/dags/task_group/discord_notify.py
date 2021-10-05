@@ -66,6 +66,7 @@ def discord_post_notify(
     http_conn_id: str,
     post: Union[str, Iterable[str], Iterable[Dict]],
     dag: DAG,
+    group_id: str = "discord_post_notify",
     channel: str = "",
     date: Optional[str] = None,
     **kwargs,
@@ -74,7 +75,7 @@ def discord_post_notify(
     Notify new post to Discord using DiscordBotOperator.
     Build message using PythonOpreator first and send it.
     """
-    discord_post_notify_task_group = TaskGroup(group_id="discord_post_notify")
+    discord_post_notify_task_group = TaskGroup(group_id=group_id)
 
     discordBuildMessageOperator = PythonOperator(
         task_id="discord_build_message",
