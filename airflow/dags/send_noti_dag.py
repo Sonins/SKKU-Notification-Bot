@@ -30,7 +30,7 @@ from task_group.discord_notify import discord_post_notify
 from airflow import DAG
 
 
-def parse_notice(date: str, **context) -> List[Dict]:
+def parse_notice(date: str = "", **context) -> List[Dict]:
     """
     크롤링 된 공지사항 포스트 중 date 날짜에 작성된 공지사항만 필터링합니다.
     이때, 해당 공지사항 포스트의 주소를 link 속성에 추가해줍니다.
@@ -50,11 +50,15 @@ def parse_notice(date: str, **context) -> List[Dict]:
     for res in responseDict["aaData"]:
         res["link"] = f'{hostname}/ko/news/notice/view/{res["id"]}'
 
-    noticeList = list(
-        filter(
-            lambda elem: elem["time"] == date.replace("-", "."), responseDict["aaData"]
+    if date:
+        noticeList = list(
+            filter(
+                lambda elem: elem["time"] == date.replace("-", "."),
+                responseDict["aaData"],
+            )
         )
-    )
+    else:
+        noticeList = list(responseDict["aaData"])
 
     return noticeList
 
