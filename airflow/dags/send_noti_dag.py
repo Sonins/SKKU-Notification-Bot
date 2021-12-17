@@ -64,6 +64,10 @@ def parse_notice(date: str = "", **context) -> List[Dict]:
 
 
 def post_exists(**context) -> str:
+    """
+    Checks if there are any posts exist.
+    return "exists" or "does_not_exists" corresponding to result.
+    """
     posts = context["ti"].xcom_pull(task_ids="parse_response")
     if len(posts) != 0:
         return "exists"
