@@ -25,9 +25,9 @@ from airflow.operators.dummy import DummyOperator
 from airflow.operators.python import BranchPythonOperator, PythonOperator
 from airflow.providers.http.operators.http import SimpleHttpOperator
 from airflow.utils.dates import days_ago
-from task_group.discord_notify import discord_post_notify
 
 from airflow import DAG
+from notibot.task_group.discord_notify import discord_post_notify
 
 
 def parse_notice(date: str = "", **context) -> List[Dict]:
