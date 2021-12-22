@@ -25,6 +25,14 @@ from airflow.utils.task_group import TaskGroup
 from operators.discord_bot_operator import DiscordBotOperator
 
 
+def _build_author_object(name: str, icon_url: str = ""):
+    obj = {}
+    obj["name"] = name
+    if icon_url:
+        obj["icon_url"] = icon_url
+    return obj
+
+
 def _build_message_helper(date: str, posts: Iterable[Dict]) -> str:
     """
     Build notification message for Discord.
@@ -39,6 +47,7 @@ def _build_message_helper(date: str, posts: Iterable[Dict]) -> str:
         elem = {}
         elem["type"] = "link"
         elem["title"] = post["title"]
+        elem["author"] = _build_author_object("공지사항 봇")
         elem["url"] = post["link"]
 
         message["embeds"].append(elem)
