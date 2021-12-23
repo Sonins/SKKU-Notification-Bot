@@ -47,7 +47,9 @@ def _build_message_helper(date: str, posts: Iterable[Dict]) -> str:
         elem = {}
         elem["type"] = "link"
         elem["title"] = post["title"]
-        elem["author"] = _build_author_object("공지사항 봇")
+        elem["author"] = _build_author_object(
+            "공지사항 봇", "https://i.imgur.com/xtoKaOP.png"
+        )
         elem["url"] = post["link"]
 
         message["embeds"].append(elem)
