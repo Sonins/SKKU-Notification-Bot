@@ -15,7 +15,6 @@
 # specific language governing permissions and limitations
 # under the License.
 
-import json
 import logging
 from typing import Dict, List
 
@@ -38,6 +37,8 @@ def parse_notice(date: str = "", **context) -> List[Dict]:
     :type date: str
     :param date: The date when post you want is written.
     """
+    import json
+
     try:
         conn = Connection.get_connection_from_secrets("skku_cs_http")
         hostname = conn.host

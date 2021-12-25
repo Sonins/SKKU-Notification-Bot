@@ -15,8 +15,6 @@
 # specific language governing permissions and limitations
 # under the License.
 
-import json
-from ast import literal_eval
 from typing import Dict, Iterable, Optional, Union
 
 from airflow.models.dag import DAG
@@ -39,6 +37,8 @@ def _build_message_helper(date: str, posts: Iterable[Dict]) -> str:
     :type date: str
     :type posts: Iterable[Dict]
     """
+    import json
+
     message = {}
     message["content"] = f"**{date} : {len(posts)}개의 공지사항이 있습니다.**"
     message["embeds"] = []
@@ -68,6 +68,8 @@ def build_discord_noti(date: str, post: Union[str, Iterable[Dict]], **context) -
                  It should be json string or iterable object of Dict.
                  It should contains property 'title' and 'link'.
     """
+    from ast import literal_eval
+
     if isinstance(post, str):
         d = literal_eval(post)
         if isinstance(d, Iterable):
