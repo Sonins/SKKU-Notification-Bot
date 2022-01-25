@@ -78,6 +78,8 @@ def post_exists(**context) -> str:
 
 args = {
     "owner": "Sonins",
+    "email": ["gmlrhks95@gmail.com"],
+    "email_on_failure": True,
 }
 
 dag = DAG(
